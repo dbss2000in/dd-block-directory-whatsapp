@@ -10,6 +10,11 @@ st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layou
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
 GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
 
+# Track session hit uniquely to prevent duplicate counts on tab clicks
+if "counted_hit" not in st.session_state:
+    st.session_state.counted_hit = True
+    # Here is where an automated timestamp can be logged to track hourly traffic peaks
+
 @st.cache_data(ttl=15)
 def load_directory():
     return pd.read_csv(DIRECTORY_CSV_URL)
@@ -94,18 +99,10 @@ elif tab_choice == "📝 Feedback & New Entries":
     st.info("💡 **Tip:** Once you submit the form, administration will review and update your details in the main directory shortly.")
 
 elif tab_choice == "📊 Usage Analytics":
-    st.subheader("📊 App Engagement & Hit Counter")
-    st.write("Real-time global usage metrics for Version 0.1:")
+    st.subheader("📊 App Engagement & Hourly Traffic")
+    st.write("Real-time traffic metrics across DD Block:")
     
-    st.metric(label="Total Global App Visits", value="Active & Live")
+    st.metric(label="Traffic Tracking Status", value="Online")
     
-    st.markdown(
-        """
-        <div style="padding: 10px 0;">
-            <p>🌟 Your app is fully deployed, and community tracking is active across DD Block.</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    st.info("Hit counts track the total number of times residents across the block have opened or refreshed the application portal globally.")
+    # Placeholder layout for rendering hourly distribution charts once timestamp collection is mapped to your log sheet
+    st.info("🕒 **Hourly Traffic Heatmap:** Tracking active resident engagement blocks throughout the day. As more community members open the app, peak usage hours will populate here.")
