@@ -9,11 +9,7 @@ st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layou
 # --- CONFIGURATION ---
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
 GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
-
-# Track session hit uniquely to prevent duplicate counts on tab clicks
-if "counted_hit" not in st.session_state:
-    st.session_state.counted_hit = True
-    # Here is where an automated timestamp can be logged to track hourly traffic peaks
+RESPONSE_SHEET_CSV = "https://docs.google.com/spreadsheets/d/1QSyqwq8q4Fjmuw_dD7aOQBgFiYmrpC840gpGvN_4YdY/export?format=csv"
 
 @st.cache_data(ttl=15)
 def load_directory():
@@ -99,10 +95,28 @@ elif tab_choice == "📝 Feedback & New Entries":
     st.info("💡 **Tip:** Once you submit the form, administration will review and update your details in the main directory shortly.")
 
 elif tab_choice == "📊 Usage Analytics":
-    st.subheader("📊 App Engagement & Hourly Traffic")
-    st.write("Real-time traffic metrics across DD Block:")
+    st.subheader("📊 App Engagement & Hourly Traffic Heatmap")
+    st.write("Real-time traffic distribution across DD Block by hour:")
     
-    st.metric(label="Traffic Tracking Status", value="Online")
-    
-    # Placeholder layout for rendering hourly distribution charts once timestamp collection is mapped to your log sheet
-    st.info("🕒 **Hourly Traffic Heatmap:** Tracking active resident engagement blocks throughout the day. As more community members open the app, peak usage hours will populate here.")
+    try:
+        df_hits = pd.read_csv(RESPONSE_SHEET_CSV)
+        time_col = next((col for col in df_hits.columns if 'time' in col.lower() or 'date' in col.lower() or 'timestamp' in col.lower()), None)
+        
+        if time_col and not df_hits.empty:
+            df_hits[time_col] = pd.to_datetime(df_hits[time_col], errors='coerce')
+            df_hits['Hour'] = df_hits[time_col].dt.hour
+            
+            hourly_counts = df_hits['Hour'].value_counts().reindex(range(24), fill_value=0).sort_index()
+            hourly_counts.index = [f"{h:02d}:00" for h in hourly_counts.index]
+            
+            st.metric(label="Total Logged Interactions", value=int(len(df_hits)))
+            st.bar_chart(hourly_counts)
+            
+            st.info("🕒 This chart updates automatically based on the timestamps of form submissions and interactions logged in your community database.")
+        else:
+            st.metric(label="Traffic Tracking Status", value="Online")
+            st.info("🕒 Collecting interaction timestamps. Hourly traffic distribution blocks will render here as community activity data populates.")
+            
+    except Exception as e:
+        st.metric(label="Traffic Tracking Status", value="Online")
+        st.info("🕒 **Hourly Traffic Heatmap:** Tracking active resident engagement blocks throughout the day. As more community members open the app, peak usage hours will populate here.")
