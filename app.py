@@ -3,12 +3,10 @@ import pandas as pd
 import urllib.parse
 from datetime import datetime
 import re
-import streamlit.components.v1 as components
 
 st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layout="centered")
 
 # --- CONFIGURATION ---
-# Converted automatically to active CSV download format from your pubhtml link:
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
 
 if "total_hits" not in st.session_state:
@@ -64,7 +62,6 @@ if tab_choice == "📖 Directory & Maps":
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_address}"
                 st.markdown(f"📍 **Plot:** [{address}]({map_url}) | 🚗 [Directions]({directions_url})")
 
-            # Handles single numbers, double numbers separated by /, or triple numbers separated by /
             if pd.notna(phone_raw) and str(phone_raw).lower() != "nan":
                 phone_list = re.split(r',|/|\band\b', str(phone_raw))
                 
@@ -94,11 +91,20 @@ if tab_choice == "📖 Directory & Maps":
 
 elif tab_choice == "📝 Feedback & New Entries":
     st.subheader("📝 Request New Entry or Modification")
-    st.write("Please fill out the form below to submit a new resident entry or request a data correction.")
+    st.write("Click the button below to open the secure request form in your browser. It takes less than a minute to submit a new entry or update details!")
     
-    # Embedded Google Form Link provided by you
-    form_url = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform?embedded=true"
-    components.iframe(form_url, height=750, scrolling=True)
+    # Direct Clean Link Button (Bypasses cookie blocks entirely on mobile phones)
+    form_direct_url = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
+    
+    st.markdown(f"""
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+        <a href="{form_direct_url}" target="_blank" style="background-color: #0284c7; color: white; padding: 15px 30px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 8px; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); display: inline-block;">
+            📋 Open Request & Correction Form
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.info("💡 **Tip:** Once you submit the form, administration will review and update your details in the main directory shortly.")
 
 elif tab_choice == "📊 Usage Analytics":
     st.subheader("📊 App Engagement & Hit Counter")
