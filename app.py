@@ -8,14 +8,7 @@ st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layou
 
 # --- CONFIGURATION ---
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
-
-# Your newly published live Google Form link:
 GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
-
-if "total_hits" not in st.session_state:
-    st.session_state.total_hits = 0
-
-st.session_state.total_hits += 1
 
 @st.cache_data(ttl=15)
 def load_directory():
@@ -65,7 +58,6 @@ if tab_choice == "📖 Directory & Maps":
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_address}"
                 st.markdown(f"📍 **Plot:** [{address}]({map_url}) | 🚗 [Directions]({directions_url})")
 
-            # Handles single numbers or multiple numbers separated by slashes, commas, or 'and'
             if pd.notna(phone_raw) and str(phone_raw).lower() != "nan":
                 phone_list = re.split(r',|/|\band\b', str(phone_raw))
                 
@@ -103,6 +95,16 @@ elif tab_choice == "📝 Feedback & New Entries":
 
 elif tab_choice == "📊 Usage Analytics":
     st.subheader("📊 App Engagement & Hit Counter")
-    st.write("Real-time usage metrics for Version 0.1:")
-    st.metric(label="Total App Hits / Visits", value=st.session_state.total_hits)
-    st.info("Hit counts track the total number of times residents have opened or refreshed the application portal.")
+    st.write("Real-time global usage metrics for Version 0.1:")
+    
+    # Embedded global visitor hit counter badge
+    st.markdown(
+        """
+        <div style="padding: 10px 0;">
+            <img src="https://counter8.optistats.ovh/private/freecounterstat.c?c=9b2xszrhyq9gclry34hkh84u13cbsx3e" border="0" title="website hit counter" alt="website hit counter">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.info("Hit counts track the total number of times residents across the block have opened or refreshed the application portal globally.")
