@@ -98,6 +98,7 @@ elif tab_choice == "📊 Usage Analytics":
     st.subheader("📊 App Engagement & Hourly Traffic Heatmap")
     st.write("Real-time traffic distribution across DD Block by hour:")
     
+    chart_loaded = False
     try:
         df_hits = pd.read_csv(RESPONSE_SHEET_CSV)
         time_col = next((col for col in df_hits.columns if 'time' in col.lower() or 'date' in col.lower() or 'timestamp' in col.lower()), None)
@@ -111,12 +112,17 @@ elif tab_choice == "📊 Usage Analytics":
             
             st.metric(label="Total Logged Interactions", value=int(len(df_hits)))
             st.bar_chart(hourly_counts)
-            
-            st.info("🕒 This chart updates automatically based on the timestamps of form submissions and interactions logged in your community database.")
-        else:
-            st.metric(label="Traffic Tracking Status", value="Online")
-            st.info("🕒 Collecting interaction timestamps. Hourly traffic distribution blocks will render here as community activity data populates.")
-            
-    except Exception as e:
-        st.metric(label="Traffic Tracking Status", value="Online")
-        st.info("🕒 **Hourly Traffic Heatmap:** Tracking active resident engagement blocks throughout the day. As more community members open the app, peak usage hours will populate here.")
+            chart_loaded = True
+            st.info("🕒 Live chart powered by your Google Form response timestamps.")
+    except Exception:
+        pass
+
+    if not chart_loaded:
+        # Fallback preview chart so you can immediately see the hour-wise layout
+        st.metric(label="Total Logged Interactions (Preview)", value=3)
+        mock_hours = [f"{h:02d}:00" for h in range(24)]
+        mock_data = pd.Series(0, index=mock_hours)
+        mock_data["13:00"] = 2
+        mock_data["14:00"] = 1
+        st.bar_chart(mock_data)
+        st.info("🕒 **Preview Mode:** To link your live responses, open your response spreadsheet, go to **File > Share > Publish to web**, choose **Comma-separated values (.csv)**, click Publish, and replace the response sheet link.")
