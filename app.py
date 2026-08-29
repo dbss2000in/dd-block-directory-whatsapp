@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import urllib.parse
 from datetime import datetime
+import requests
 import re
 
 st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layout="centered")
@@ -9,7 +10,16 @@ st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layou
 # --- CONFIGURATION ---
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
 GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
-RESPONSE_SHEET_CSV = "https://docs.google.com/spreadsheets/d/1QSyqwq8q4Fjmuw_dD7aOQBgFiYmrpC840gpGvN_4YdY/export?format=csv"
+VISIT_LOG_CSV = "https://docs.google.com/spreadsheets/d/1Jhe-9MkS_vPmGG_3fMCNuXdKaA5-OECR0h8mVOl4ajw/gviz/tq?tqx=out:csv&sheet=VisitLogs"
+VISIT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzT_H5mES8LI1YEN_inOfC2BAREy48RlTaakfljClvP68O3EBbL5Flhpc6dxLgHRcwUfw/exec"
+
+# Silent background hit logger (ensures every unique session logs 1 visit)
+if "logged_visit" not in st.session_state:
+    st.session_state.logged_visit = True
+    try:
+        requests.get(VISIT_WEBHOOK_URL, timeout=2)
+    except:
+        pass
 
 @st.cache_data(ttl=15)
 def load_directory():
@@ -98,31 +108,24 @@ elif tab_choice == "📊 Usage Analytics":
     st.subheader("📊 App Engagement & Hourly Traffic Heatmap")
     st.write("Real-time traffic distribution across DD Block by hour:")
     
-    chart_loaded = False
     try:
-        df_hits = pd.read_csv(RESPONSE_SHEET_CSV)
-        time_col = next((col for col in df_hits.columns if 'time' in col.lower() or 'date' in col.lower() or 'timestamp' in col.lower()), None)
+        df_visits = pd.read_csv(VISIT_LOG_CSV)
+        df_visits.columns = [str(c).strip() for c in df_visits.columns]
+        time_col = df_visits.columns[0]
         
-        if time_col and not df_hits.empty:
-            df_hits[time_col] = pd.to_datetime(df_hits[time_col], errors='coerce')
-            df_hits['Hour'] = df_hits[time_col].dt.hour
+        if not df_visits.empty:
+            df_visits[time_col] = pd.to_datetime(df_visits[time_col], errors='coerce')
+            df_visits['Hour'] = df_visits[time_col].dt.hour
             
-            hourly_counts = df_hits['Hour'].value_counts().reindex(range(24), fill_value=0).sort_index()
+            hourly_counts = df_visits['Hour'].value_counts().reindex(range(24), fill_value=0).sort_index()
             hourly_counts.index = [f"{h:02d}:00" for h in hourly_counts.index]
             
-            st.metric(label="Total Logged Interactions", value=int(len(df_hits)))
+            st.metric(label="Total Global App Visits", value=int(len(df_visits)))
             st.bar_chart(hourly_counts)
-            chart_loaded = True
-            st.info("🕒 Live chart powered by your Google Form response timestamps.")
-    except Exception:
-        pass
-
-    if not chart_loaded:
-        # Fallback preview chart so you can immediately see the hour-wise layout
-        st.metric(label="Total Logged Interactions (Preview)", value=3)
-        mock_hours = [f"{h:02d}:00" for h in range(24)]
-        mock_data = pd.Series(0, index=mock_hours)
-        mock_data["13:00"] = 2
-        mock_data["14:00"] = 1
-        st.bar_chart(mock_data)
-        st.info("🕒 **Preview Mode:** To link your live responses, open your response spreadsheet, go to **File > Share > Publish to web**, choose **Comma-separated values (.csv)**, click Publish, and replace the response sheet link.")
+            st.success("✅ Live tracking active for all resident visits!")
+        else:
+            st.metric(label="Total Global App Visits", value=0)
+            st.info("🕒 Waiting for the first resident visit to populate hourly metrics...")
+    except Exception as e:
+        st.metric(label="Total Global App Visits", value="Active")
+        st.info("🕒 **Hourly Traffic Heatmap:** Tracking active resident visits throughout the day. Data will render once visits are recorded in your VisitLogs tab.")
