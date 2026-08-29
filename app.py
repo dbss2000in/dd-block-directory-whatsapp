@@ -7,10 +7,9 @@ import re
 st.set_page_config(page_title="DD Block Directory v0.1", page_icon="📍", layout="centered")
 
 # --- CONFIGURATION ---
-# Active raw CSV download link generated from your provided Google Sheet link:
 DIRECTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQm-1lqodJfHqPzBnhDSTIxwnc0HqDHVN0gtR4VF78SyyI9R6kbsfaHbAxJR0qkfWXsdIXAsMMDgFm9/pub?output=csv"
 
-# Active direct view link extracted from your Google Form iframe snippet:
+# Clean direct form URL (removed embedded=true restriction)
 GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdv4UTrJlLVnxDtsW7rU09bqNG3hWOOhmjMuc6x-nazvtjjjQ/viewform"
 
 if "total_hits" not in st.session_state:
@@ -66,7 +65,6 @@ if tab_choice == "📖 Directory & Maps":
                 directions_url = f"https://www.google.com/maps/dir/?api=1&destination={encoded_address}"
                 st.markdown(f"📍 **Plot:** [{address}]({map_url}) | 🚗 [Directions]({directions_url})")
 
-            # Handles single numbers or multiple numbers separated by slashes, commas, or 'and'
             if pd.notna(phone_raw) and str(phone_raw).lower() != "nan":
                 phone_list = re.split(r',|/|\band\b', str(phone_raw))
                 
@@ -98,14 +96,8 @@ elif tab_choice == "📝 Feedback & New Entries":
     st.subheader("📝 Request New Entry or Modification")
     st.write("Click the button below to open the secure request form in your browser. It takes less than a minute to submit a new entry or update details!")
     
-    # Direct button link cleanly opening your extracted Google Form
-    st.markdown(f"""
-    <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-        <a href="{GOOGLE_FORM_URL}" target="_blank" style="background-color: #0284c7; color: white; padding: 15px 30px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 8px; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); display: inline-block;">
-            📋 Open Request & Correction Form
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    # Native Streamlit link button ensures safe mobile browser routing without iframe cookie blocks
+    st.link_button("📋 Open Request & Correction Form", GOOGLE_FORM_URL, use_container_width=True)
     
     st.info("💡 **Tip:** Once you submit the form, administration will review and update your details in the main directory shortly.")
 
