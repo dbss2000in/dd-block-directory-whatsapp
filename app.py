@@ -97,6 +97,22 @@ elif tab_choice == "📊 Usage Analytics":
     st.subheader("📊 App Engagement & Hit Counter")
     st.write("Real-time global usage metrics for Version 0.1:")
     
+    # Clean native Streamlit metric display
+    st.metric(label="Total Global App Visits", value="Active & Live")
+    
+    st.markdown(
+        """
+        <div style="padding: 10px 0;">
+            <p>🌟 Your app is fully deployed, and community tracking is active across DD Block.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.info("Hit counts track the total number of times residents across the block have opened or refreshed the application portal globally.")
+    st.subheader("📊 App Engagement & Hit Counter")
+    st.write("Real-time global usage metrics for Version 0.1:")
+    
     # Embedded global visitor hit counter badge
     st.markdown(
         """
