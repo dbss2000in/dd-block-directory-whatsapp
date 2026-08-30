@@ -32,7 +32,6 @@ tab_choice = st.radio("Navigation Menu", ["📖 Directory & Maps", "📝 Feedbac
 st.divider()
 
 if tab_choice == "📖 Directory & Maps":
-elif tab_choice == "📖 Directory & Maps":
     try:
         df = load_directory()
         df.columns = [str(c).strip() for c in df.columns]
@@ -57,10 +56,9 @@ elif tab_choice == "📖 Directory & Maps":
         else:
             filtered_df = df
 
-        st.write(f"Showing **{len(filtered_df)}** entries as interactive cards")
+        st.write(f"Showing **{len(filtered_df)}** entries as cards")
         st.divider()
 
-        # --- INDIVIDUAL RESIDENT CARD DECK ---
         for index, row in filtered_df.iterrows():
             name = row.get(name_col, "N/A")
             address = row.get(address_col, "N/A")
@@ -69,7 +67,6 @@ elif tab_choice == "📖 Directory & Maps":
             if pd.isna(name) or str(name).strip() == "" or str(name).lower() == "nan":
                 continue
                 
-            # Using Streamlit container to give each entry a clean card box look
             with st.container(border=True):
                 st.markdown(f"👤 **{name}**")
                 
@@ -105,6 +102,7 @@ elif tab_choice == "📖 Directory & Maps":
 
     except Exception as e:
         st.error(f"Error loading directory data: {e}")
+
 elif tab_choice == "📝 Feedback & New Entries":
     st.subheader("📝 Request New Entry or Modification")
     st.write("Click the button below to open the secure request form in your browser. It takes less than a minute to submit a new entry or update details!")
