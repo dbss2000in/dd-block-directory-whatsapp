@@ -48,7 +48,21 @@ if tab_choice == "📖 Directory & Maps":
             </div>
         """, unsafe_allow_html=True)
 
-        search_query = st.text_input("🔍 Search by Name, Plot Number, or Phone", "")
+        # --- BIG, BOLD, CAPITALIZED SEARCH SECTION ---
+        st.markdown(
+            "<h3 style='color: #2c3e50; font-weight: bold; font-size: 18px; margin-bottom: 2px;'>🔍 SEARCH DIRECTORY</h3>", 
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            "<p style='color: #666; font-size: 13px; margin-bottom: 8px;'>Search easily by Name, Plot Number (e.g., DD-142), or Phone digits.</p>", 
+            unsafe_allow_html=True
+        )
+        
+        search_query = st.text_input(
+            "Search Input", 
+            label_visibility="collapsed",
+            placeholder="Type name, plot, or phone..."
+        )
         
         if search_query:
             mask = df.astype(str).apply(lambda x: x.str.contains(search_query, case=False, na=False)).any(axis=1)
@@ -56,9 +70,10 @@ if tab_choice == "📖 Directory & Maps":
         else:
             filtered_df = df
 
-        st.write(f"Showing **{len(filtered_df)}** entries as cards")
+        st.write(f"Showing **{len(filtered_df)}** matching resident cards")
         st.divider()
 
+        # --- INDIVIDUAL RESIDENT CARD DECK ---
         for index, row in filtered_df.iterrows():
             name = row.get(name_col, "N/A")
             address = row.get(address_col, "N/A")
